@@ -570,8 +570,10 @@ void xlsx_producer::write_workbook(const relationship &rel)
 
     write_start_element(xmlns, "sheets");
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wrange-loop-analysis"
+#endif
     for (const auto ws : source_)
     {
         auto sheet_rel_id = source_.d_->sheet_title_rel_id_map_[ws.title()];
@@ -589,7 +591,9 @@ void xlsx_producer::write_workbook(const relationship &rel)
         write_attribute(xml::qname(xmlns_r, "id"), sheet_rel_id);
         write_end_element(xmlns, "sheet");
     }
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 
     write_end_element(xmlns, "sheets");
 
@@ -791,8 +795,10 @@ void xlsx_producer::write_shared_string_table(const relationship & /*rel*/)
     // todo: is there a more elegant way to get this number?
     std::size_t string_count = 0;
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wrange-loop-analysis"
+#endif
     for (const auto ws : source_)
     {
         auto dimension = ws.calculate_dimension();
@@ -815,7 +821,9 @@ void xlsx_producer::write_shared_string_table(const relationship & /*rel*/)
             current_cell.column_index(dimension.top_left().column_index());
         }
     }
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 
     write_attribute("count", string_count);
     write_attribute("uniqueCount", source_.shared_strings().size());

@@ -21,12 +21,16 @@
 // @license: http://www.opensource.org/licenses/mit-license.php
 // @author: see AUTHORS file
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated"
 #pragma clang diagnostic ignored "-Wweak-vtables"
 #pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
 #include <utf8.h>
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 
 #include <detail/unicode.hpp>
 

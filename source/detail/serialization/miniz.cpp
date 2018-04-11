@@ -26,6 +26,7 @@
 
 #include  <detail/serialization/miniz.hpp>
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
 #pragma clang diagnostic ignored "-Wsign-conversion"
@@ -36,6 +37,7 @@
 #pragma clang diagnostic ignored "-Wundef"
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-W#pragma-messages"
+#endif
 
 typedef unsigned char mz_validate_uint16[sizeof(mz_uint16) == 2 ? 1 : -1];
 typedef unsigned char mz_validate_uint32[sizeof(mz_uint32) == 4 ? 1 : -1];
@@ -2107,14 +2109,14 @@ void *tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int 
     *pLen_out = out_buf.m_size - 41;
     {
         static const mz_uint8 chans[] = { 0x00, 0x00, 0x04, 0x02, 0x06 };
-        mz_uint8 pnghdr[41] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 
-								0x0a, 0x1a, 0x0a, 0x00, 0x00, 
-								0x00, 0x0d, 0x49, 0x48, 0x44, 
-								0x52, 0x00, 0x00, 0x00, 0x00, 
-								0x00, 0x00, 0x00, 0x00, 0x08, 
-								0x00, 0x00, 0x00, 0x00, 0x00, 
-								0x00, 0x00, 0x00, 0x00, 0x00, 
-								0x00, 0x00, 0x49, 0x44, 0x41, 
+        mz_uint8 pnghdr[41] = { 0x89, 0x50, 0x4e, 0x47, 0x0d,
+								0x0a, 0x1a, 0x0a, 0x00, 0x00,
+								0x00, 0x0d, 0x49, 0x48, 0x44,
+								0x52, 0x00, 0x00, 0x00, 0x00,
+								0x00, 0x00, 0x00, 0x00, 0x08,
+								0x00, 0x00, 0x00, 0x00, 0x00,
+								0x00, 0x00, 0x00, 0x00, 0x00,
+								0x00, 0x00, 0x49, 0x44, 0x41,
 								0x54 };
 		pnghdr[18] = (mz_uint8)(w >> 8);
 		pnghdr[19] = (mz_uint8)w;
@@ -4976,7 +4978,7 @@ mz_bool mz_zip_validate_file(mz_zip_archive *pZip, mz_uint file_index, mz_uint f
         has_id = (MZ_READ_LE32(descriptor_buf) == MZ_ZIP_DATA_DESCRIPTOR_ID);
 		pSrc = has_id ? (descriptor_buf + sizeof(mz_uint32)) : descriptor_buf;
 
-        file_crc32 = MZ_READ_LE32(pSrc);        
+        file_crc32 = MZ_READ_LE32(pSrc);
 
         if ((pState->m_zip64) || (found_zip64_ext_data_in_ldir))
         {
@@ -7278,4 +7280,6 @@ mz_bool mz_zip_end(mz_zip_archive *pZip)
 
 #endif /*#ifndef MINIZ_NO_ARCHIVE_APIS*/
 
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif

@@ -223,10 +223,14 @@ public:
         // initialize the inflate
         if (compressed_data && valid)
         {
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
+#endif
             int result = inflateInit2(&strm, -MAX_WBITS);
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 
             if (result != Z_OK)
             {
@@ -333,10 +337,14 @@ public:
         strm.zfree = nullptr;
         strm.opaque = nullptr;
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
+#endif
         int ret = deflateInit2(&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, -MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 
         if (ret != Z_OK)
         {

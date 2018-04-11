@@ -22,12 +22,16 @@
 // @author: see AUTHORS file
 #pragma once
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
 #pragma clang diagnostic ignored "-Wextra-semi"
 #pragma clang diagnostic ignored "-Wdeprecated"
+#endif
 #include <xml/content>
 #include <xml/parser>
 #include <xml/qname>
 #include <xml/serializer>
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
