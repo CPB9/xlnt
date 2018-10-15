@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2017 Thomas Fussell
+// Copyright (c) 2014-2018 Thomas Fussell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,51 +21,35 @@
 // @license: http://www.opensource.org/licenses/mit-license.php
 // @author: see AUTHORS file
 
-#pragma once
-
-#include <iostream>
-
+#include <xlnt/styles/protection.hpp>
 #include <helpers/test_suite.hpp>
 #include <xlnt/xlnt.hpp>
 
-class page_setup_test_suite : public test_suite
+class protection_test_suite : public test_suite
 {
 public:
-    page_setup_test_suite()
+    protection_test_suite()
     {
-        register_test(test_properties);
+        register_test(test_all);
     }
 
-    void test_properties()
+    void test_all()
     {
-        xlnt::page_setup ps;
+        auto prot = xlnt::protection::unlocked_and_visible();
+        xlnt_assert(!prot.hidden());
+        xlnt_assert(!prot.locked());
 
-        xlnt_assert_equals(ps.paper_size(), xlnt::paper_size::letter);
-        ps.paper_size(xlnt::paper_size::executive);
-        xlnt_assert_equals(ps.paper_size(), xlnt::paper_size::executive);
+        prot = xlnt::protection::locked_and_visible();
+        xlnt_assert(!prot.hidden());
+        xlnt_assert(prot.locked());
 
-        xlnt_assert_equals(ps.orientation(), xlnt::orientation::portrait);
-        ps.orientation(xlnt::orientation::landscape);
-        xlnt_assert_equals(ps.orientation(), xlnt::orientation::landscape);
+        prot = xlnt::protection::unlocked_and_hidden();
+        xlnt_assert(prot.hidden());
+        xlnt_assert(!prot.locked());
 
-        xlnt_assert(!ps.fit_to_page());
-        ps.fit_to_page(true);
-        xlnt_assert(ps.fit_to_page());
-
-        xlnt_assert(!ps.fit_to_height());
-        ps.fit_to_height(true);
-        xlnt_assert(ps.fit_to_height());
-
-        xlnt_assert(!ps.fit_to_width());
-        ps.fit_to_width(true);
-        xlnt_assert(ps.fit_to_width());
-
-        xlnt_assert(!ps.horizontal_centered());
-        ps.horizontal_centered(true);
-        xlnt_assert(ps.horizontal_centered());
-
-        xlnt_assert(!ps.vertical_centered());
-        ps.vertical_centered(true);
-        xlnt_assert(ps.vertical_centered());
+        prot = xlnt::protection::locked_and_hidden();
+        xlnt_assert(prot.hidden());
+        xlnt_assert(prot.locked());
     }
 };
+static protection_test_suite x;

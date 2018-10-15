@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2017 Thomas Fussell
+// Copyright (c) 2014-2018 Thomas Fussell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,28 +21,44 @@
 // @license: http://www.opensource.org/licenses/mit-license.php
 // @author: see AUTHORS file
 
-#pragma once
-
-#include <iostream>
-
+#include <xlnt/styles/conditional_format.hpp>
 #include <helpers/test_suite.hpp>
 #include <xlnt/xlnt.hpp>
 
-class alignment_test_suite : public test_suite
+class conditional_format_test_suite : public test_suite
 {
 public:
-    alignment_test_suite()
+    conditional_format_test_suite()
     {
         register_test(test_all);
     }
 
     void test_all()
     {
-        xlnt::alignment alignment;
-
-        xlnt_assert(!alignment.horizontal().is_set());
-        xlnt_assert(!alignment.vertical().is_set());
-        xlnt_assert(!alignment.shrink());
-        xlnt_assert(!alignment.wrap());
+        xlnt::workbook wb;
+        auto ws = wb.active_sheet();
+        auto format = ws.conditional_format(xlnt::range_reference("A1:A10"), xlnt::condition::text_contains("test"));
+        xlnt_assert(!format.has_border());
+        xlnt_assert(!format.has_fill());
+        xlnt_assert(!format.has_font());
+        // set border
+        auto border = xlnt::border().diagonal(xlnt::diagonal_direction::both);
+        format.border(border);
+        xlnt_assert(format.has_border());
+        xlnt_assert_equals(format.border(), border);
+        // set fill
+        auto fill = xlnt::fill(xlnt::gradient_fill().type(xlnt::gradient_fill_type::path));
+        format.fill(fill);
+        xlnt_assert(format.has_fill());
+        xlnt_assert_equals(format.fill(), fill);
+        // set font
+        auto font = xlnt::font().color(xlnt::color::darkblue());
+        format.font(font);
+        xlnt_assert(format.has_font());
+        xlnt_assert_equals(format.font(), font);
+        // copy ctor
+        auto format_copy(format);
+        xlnt_assert_equals(format, format_copy);
     }
 };
+static conditional_format_test_suite x;

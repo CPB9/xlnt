@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2017 Thomas Fussell
+// Copyright (c) 2014-2018 Thomas Fussell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,14 +21,18 @@
 // @license: http://www.opensource.org/licenses/mit-license.php
 // @author: see AUTHORS file
 
-#pragma once
-
 #include <iostream>
 
-#include <helpers/test_suite.hpp>
+#include <xlnt/cell/cell.hpp>
+#include <xlnt/cell/hyperlink.hpp>
 #include <xlnt/workbook/workbook.hpp>
+#include <xlnt/worksheet/column_properties.hpp>
+#include <xlnt/worksheet/row_properties.hpp>
+#include <xlnt/worksheet/range.hpp>
+#include <xlnt/worksheet/worksheet.hpp>
 #include <xlnt/worksheet/header_footer.hpp>
 #include <xlnt/worksheet/worksheet.hpp>
+#include <helpers/test_suite.hpp>
 
 class worksheet_test_suite : public test_suite
 {
@@ -46,7 +50,6 @@ public:
         register_test(test_remove_named_range_bad);
         register_test(test_cell_alternate_coordinates);
         register_test(test_cell_range_name);
-        register_test(test_hyperlink_value);
         register_test(test_rows);
         register_test(test_no_rows);
         register_test(test_no_cols);
@@ -101,6 +104,7 @@ public:
         register_test(test_view_properties_serialization);
         register_test(test_clear_cell);
         register_test(test_clear_row);
+        register_test(test_set_title);
     }
 
     void test_new_worksheet()
@@ -218,18 +222,6 @@ public:
         auto c_cell = ws.cell("B12");
         xlnt_assert_equals(c_range_coord, c_range_name);
         xlnt_assert(c_range_coord[0][0] == c_cell);
-    }
-
-    void test_hyperlink_value()
-    {
-        xlnt::workbook wb;
-        auto ws = wb.active_sheet();
-        ws.cell("A1").hyperlink("http://test.com");
-        xlnt_assert_equals(ws.cell("A1").hyperlink(), "http://test.com");
-        xlnt_assert_equals(ws.cell("A1").value<std::string>(), "");
-        ws.cell("A1").value("test");
-        xlnt_assert_equals("test", ws.cell("A1").value<std::string>());
-        xlnt_assert_equals(ws.cell("A1").hyperlink(), "http://test.com");
     }
 
     void test_rows()
@@ -376,7 +368,6 @@ public:
         xlnt_assert(!merged.contains("O1"));
     }
 
-
     void test_merged_cell_ranges()
     {
         xlnt::workbook wb;
@@ -391,7 +382,7 @@ public:
         ws.cell("A1").value(1);
         ws.cell("D4").value(16);
         ws.merge_cells("A1:D4");
-        std::vector<xlnt::range_reference> expected = { xlnt::range_reference("A1:D4") };
+        std::vector<xlnt::range_reference> expected = {xlnt::range_reference("A1:D4")};
         xlnt_assert_equals(ws.merged_ranges(), expected);
         xlnt_assert(!ws.cell("D4").has_value());
     }
@@ -460,10 +451,13 @@ public:
         ws.freeze_panes("A4");
 
         auto view = ws.view();
-        xlnt_assert_equals(view.selections().size(), 2);
-        xlnt_assert_equals(view.selections()[0].active_cell(), "A3");
+        xlnt_assert_equals(view.selections().size(), 1);
+        // pane is the corner of the worksheet that this selection extends to
+        // active cell is the last selected cell in the selection
+        // sqref is the last selected block in the selection
         xlnt_assert_equals(view.selections()[0].pane(), xlnt::pane_corner::bottom_left);
-        xlnt_assert_equals(view.selections()[0].sqref(), "A1");
+        xlnt_assert_equals(view.selections()[0].active_cell(), "A4");
+        xlnt_assert_equals(view.selections()[0].sqref(), "A4");
         xlnt_assert_equals(view.pane().active_pane, xlnt::pane_corner::bottom_left);
         xlnt_assert_equals(view.pane().state, xlnt::pane_state::frozen);
         xlnt_assert_equals(view.pane().top_left_cell.get(), "A4");
@@ -477,10 +471,13 @@ public:
         ws.freeze_panes("D1");
 
         auto view = ws.view();
-        xlnt_assert_equals(view.selections().size(), 2);
-        xlnt_assert_equals(view.selections()[0].active_cell(), "C1");
+        xlnt_assert_equals(view.selections().size(), 1);
+        // pane is the corner of the worksheet that this selection extends to
+        // active cell is the last selected cell in the selection
+        // sqref is the last selected block in the selection
         xlnt_assert_equals(view.selections()[0].pane(), xlnt::pane_corner::top_right);
-        xlnt_assert_equals(view.selections()[0].sqref(), "A1");
+        xlnt_assert_equals(view.selections()[0].active_cell(), "D1");
+        xlnt_assert_equals(view.selections()[0].sqref(), "D1");
         xlnt_assert_equals(view.pane().active_pane, xlnt::pane_corner::top_right);
         xlnt_assert_equals(view.pane().state, xlnt::pane_state::frozen);
         xlnt_assert_equals(view.pane().top_left_cell.get(), "D1");
@@ -495,11 +492,18 @@ public:
 
         auto view = ws.view();
         xlnt_assert_equals(view.selections().size(), 3);
+        // pane is the corner of the worksheet that this selection extends to
+        // active cell is the last selected cell in the selection
+        // sqref is the last selected block in the selection
         xlnt_assert_equals(view.selections()[0].pane(), xlnt::pane_corner::top_right);
+        xlnt_assert_equals(view.selections()[0].active_cell(), "D1");
+        xlnt_assert_equals(view.selections()[0].sqref(), "D1");
         xlnt_assert_equals(view.selections()[1].pane(), xlnt::pane_corner::bottom_left);
-        xlnt_assert_equals(view.selections()[2].active_cell(), "D4");
+        xlnt_assert_equals(view.selections()[1].active_cell(), "A4");
+        xlnt_assert_equals(view.selections()[1].sqref(), "A4");
         xlnt_assert_equals(view.selections()[2].pane(), xlnt::pane_corner::bottom_right);
-        xlnt_assert_equals(view.selections()[2].sqref(), "A1");
+        xlnt_assert_equals(view.selections()[2].active_cell(), "D4");
+        xlnt_assert_equals(view.selections()[2].sqref(), "D4");
         xlnt_assert_equals(view.pane().active_pane, xlnt::pane_corner::bottom_right);
         xlnt_assert_equals(view.pane().state, xlnt::pane_state::frozen);
         xlnt_assert_equals(view.pane().top_left_cell.get(), "D4");
@@ -825,7 +829,7 @@ public:
         xlnt::header_footer hf;
         using hf_loc = xlnt::header_footer::location;
 
-        for (auto location : { hf_loc::left, hf_loc::center, hf_loc::right })
+        for (auto location : {hf_loc::left, hf_loc::center, hf_loc::right})
         {
             xlnt_assert(!hf.has_header(location));
             xlnt_assert(!hf.has_odd_even_header(location));
@@ -850,7 +854,7 @@ public:
         xlnt::header_footer hf;
         using hf_loc = xlnt::header_footer::location;
 
-        for (auto location : { hf_loc::left, hf_loc::center, hf_loc::right })
+        for (auto location : {hf_loc::left, hf_loc::center, hf_loc::right})
         {
             xlnt_assert(!hf.has_footer(location));
             xlnt_assert(!hf.has_odd_even_footer(location));
@@ -1186,11 +1190,11 @@ public:
         xlnt_assert_equals(ws.highest_row(), last_row);
 
         wb.save("temp.xlsx");
-        
+
         xlnt::workbook wb2;
         wb2.load("temp.xlsx");
         auto ws2 = wb2.active_sheet();
-        
+
         xlnt_assert_equals(ws2.calculate_dimension().height(), height);
         xlnt_assert(!ws2.has_cell(xlnt::cell_reference(1, last_row)));
     }
@@ -1212,12 +1216,43 @@ public:
         xlnt_assert_equals(ws.highest_row(), last_row - 1);
 
         wb.save("temp.xlsx");
-        
+
         xlnt::workbook wb2;
         wb2.load("temp.xlsx");
         auto ws2 = wb2.active_sheet();
-        
+
         xlnt_assert_equals(ws2.calculate_dimension().height(), height - 1);
         xlnt_assert(!ws2.has_cell(xlnt::cell_reference(1, last_row)));
     }
+
+    void test_set_title()
+    {
+        xlnt::workbook wb;
+        auto ws1 = wb.active_sheet();
+        // empty titles are invalid
+        xlnt_assert_throws(ws1.title(""), xlnt::invalid_sheet_title);
+        // titles longer than 31 chars are invalid
+        std::string test_long_title(32, 'a');
+        xlnt_assert(test_long_title.size() > 31);
+        xlnt_assert_throws(ws1.title(test_long_title), xlnt::invalid_sheet_title);
+        // titles containing any of the following characters are invalid
+        std::string invalid_chars = "*:/\\?[]";
+        for (char &c : invalid_chars)
+        {
+            std::string invalid_char = std::string("Sheet") + c;
+            xlnt_assert_throws(ws1.title(invalid_char), xlnt::invalid_sheet_title);
+        }
+        // duplicate names are invalid
+        auto ws2 = wb.create_sheet();
+        xlnt_assert_throws(ws2.title(ws1.title()), xlnt::invalid_sheet_title);
+        xlnt_assert_throws(ws1.title(ws2.title()), xlnt::invalid_sheet_title);
+        // naming as self is valid and is ignored
+        auto ws1_title = ws1.title();
+        auto ws2_title = ws2.title();
+        xlnt_assert_throws_nothing(ws1.title(ws1.title()));
+        xlnt_assert_throws_nothing(ws2.title(ws2.title()));
+        xlnt_assert(ws1_title == ws1.title());
+        xlnt_assert(ws2_title == ws2.title());
+    }
 };
+static worksheet_test_suite x;

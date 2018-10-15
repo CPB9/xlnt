@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2017 Thomas Fussell
+// Copyright (c) 2014-2018 Thomas Fussell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,12 @@
 // @license: http://www.opensource.org/licenses/mit-license.php
 // @author: see AUTHORS file
 
-#pragma once
-
 #include <iostream>
 
 #include <helpers/test_suite.hpp>
-#include <xlnt/xlnt.hpp>
+#include <xlnt/utils/date.hpp>
+#include <xlnt/utils/datetime.hpp>
+#include <xlnt/utils/time.hpp>
 
 class datetime_test_suite : public test_suite
 {
@@ -114,3 +114,4 @@ public:
         xlnt_assert_differs(d1, d3);
     }
 };
+static datetime_test_suite x;

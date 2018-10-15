@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014-2017 Thomas Fussell
+﻿// Copyright (c) 2014-2018 Thomas Fussell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,14 @@
 // @license: http://www.opensource.org/licenses/mit-license.php
 // @author: see AUTHORS file
 
-#pragma once
-
 #include <iostream>
 
 #include <helpers/test_suite.hpp>
-#include <xlnt/xlnt.hpp>
+
+#include <xlnt/styles/number_format.hpp>
+#include <xlnt/utils/date.hpp>
+#include <xlnt/utils/time.hpp>
+#include <xlnt/utils/timedelta.hpp>
 
 class number_format_test_suite : public test_suite
 {
@@ -991,3 +993,4 @@ public:
         format_and_test(xlnt::number_format::date_myminus(), {{"5-16", "###########", "1-00", "text"}});
     }
 };
+static number_format_test_suite x;

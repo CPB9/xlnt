@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2017 Thomas Fussell
+// Copyright (c) 2014-2018 Thomas Fussell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,6 @@
 //
 // @license: http://www.opensource.org/licenses/mit-license.php
 // @author: see AUTHORS file
-
-#pragma once
 
 #include <iostream>
 
@@ -257,3 +255,4 @@ public:
             [range_as_string(range, include_value = True) for range in wbcopy.get_named_ranges()])*/
     }
 };
+static named_range_test_suite x;
